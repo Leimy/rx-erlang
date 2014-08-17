@@ -1,0 +1,13 @@
+{application, rx,
+ [
+  {description, "RadioXenu stream/bot"},
+  {vsn, "1"},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { rx_app, []}},
+  {modules, [bot, shout, rx_app]},
+  {registered, [bot, shout]},
+  {env, []}
+ ]}.
