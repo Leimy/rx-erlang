@@ -1,0 +1,15 @@
+* What?
+A streamcast metadata capture tool and an IRC bot.  It's a work-in-progress
+on both fronts and needs some cleanup.
+It's also my first rebar based Erlang project.
+* How?
+Learn about rebar.  Use google.  Learn how to launch erlang stuff.
+When this is less of a work in progress I'll make it easier to launch.
+* Why?
+Wanted to stretch out a little bit and re-excersise some old knowledge.
+* Warranty?
+NO. I make no claim that this works at all or doesn't somehow ruin 
+your life or business.  You assume all risk by using it.  The 
+code is public domain.  Use it as you like.
+* License
+Public domain.  I really don't care.
