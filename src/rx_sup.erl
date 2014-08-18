@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
-%%% @author David Leimbach <dleimbach@isilon.com>
+%%% @author David Leimbach <leimy2k@gmail.com>
 %%% @copyright (C) 2014, David Leimbach
 %%% @doc
 %%%
 %%% @end
-%%% Created : 16 Aug 2014 by David Leimbach <dleimbach@isilon.com>
+%%% Created : 16 Aug 2014 by David Leimbach 
 %%%-------------------------------------------------------------------
 -module(rx_sup).
 

@@ -3,7 +3,7 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 15 Aug 2014 by David Leimbach <dleimbach@isilon.com>
+%%% Created : 15 Aug 2014 by David Leimbach
 %%%-------------------------------------------------------------------
 -module(bot).
 -include("../include/logger.hrl").
