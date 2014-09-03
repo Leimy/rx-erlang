@@ -226,12 +226,14 @@ do_it(Sock, Channel, [User, "PRIVMSG", Channel, ":?lastsong?" | _]) ->
     {ok, MetaBin} = shout:get_metadata(),
     NickResp = parse_resp_user(User),
     S = try parse_artist_and_song(MetaBin) of 
-	{Artist, Song}  -> 
-	    io_lib:format("PRIVMSG ~s :~s, the last song playing I know of is: ~s by ~s~s", [Channel, NickResp, Song, Artist, [13,10]])
-    catch 
-	_:_ -> 
-	    io_lib:format("PRIVMSG ~s :~s, ~s~s", [Channel, NickResp, binary:bin_to_list(MetaBin), [13,10]])
-    end,
+	    {Artist, Song}  -> 
+		io_lib:format("PRIVMSG ~s :~s, the last song playing I know of is: ~s by ~s~s", [Channel, NickResp, Song, Artist, [13,10]]);
+	    X -> 
+		io_lib:format("PRIVMSG ~s :~s, the last song I couldn't parse normally but here: ~s ~s", [Channel, NickResp, X, [13,10]])		    
+	catch 
+	    _:_ -> 
+		io_lib:format("PRIVMSG ~s :~s, ~s~s", [Channel, NickResp, binary:bin_to_list(MetaBin), [13,10]])
+	end,
     gen_tcp:send(Sock, S);
 
 do_it(_S, _C, _Stuff) -> 
