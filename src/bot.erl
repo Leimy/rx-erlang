@@ -163,7 +163,7 @@ receive_loop(Sock, SoFar) ->
 				<<SoFar/binary, Bin/binary>>;
 			    true -> Bin
 			end,		
-	    {ok,Rest} = gen_server:call(?MODULE, {parse_binary, ConcatBin}, infinity),
+	    {ok, Rest} = gen_server:call(?MODULE, {parse_binary, ConcatBin}, infinity),
 	    receive_loop(Sock, Rest);
 	{tcp_closed, Sock} ->
 	    ?ERRLOG("Socket closed", []);
@@ -223,18 +223,13 @@ do_it(Sock, _Chan, ["PING" | Rest]) ->
     gen_tcp:send(Sock, string:join(["PONG",Rest++[13,10]], " "));
 
 do_it(Sock, Channel, [User, "PRIVMSG", Channel, ":?lastsong?" | _]) ->    
-    {ok, MetaBin} = shout:get_metadata(),
     NickResp = parse_resp_user(User),
-    S = try parse_artist_and_song(MetaBin) of 
-	    {Artist, Song}  -> 
-		io_lib:format("PRIVMSG ~s :~s, the last song playing I know of is: ~s by ~s~s", [Channel, NickResp, Song, Artist, [13,10]]);
-	    X -> 
-		io_lib:format("PRIVMSG ~s :~s, the last song I couldn't parse normally but here: ~s ~s", [Channel, NickResp, X, [13,10]])		    
-	catch 
-	    _:_ -> 
-		io_lib:format("PRIVMSG ~s :~s, ~s~s", [Channel, NickResp, binary:bin_to_list(MetaBin), [13,10]])
-	end,
-    gen_tcp:send(Sock, S);
+    {ok, MetaBin} = shout:get_metadata(),
+    reply_to_nick(Sock, Channel, NickResp, "~s", rip_meta(MetaBin));
+
+do_it(Sock, Channel, [User, "PRIVMSG", Channel, ":Hi" | _]) ->
+    NickResp = parse_resp_user(User),
+    reply_to_nick(Sock, Channel, NickResp, "What's goin on?", []);
 
 do_it(_S, _C, _Stuff) -> 
     ?INFOLOG("Unhandled: ~p", [_Stuff]),
@@ -244,10 +239,6 @@ parse_resp_user(User) ->
     [NickResp | _] = string:tokens(string:substr(User, 2), "!"),
     NickResp.
 
-parse_artist_and_song(MetaBin) ->
-    MetaString = binary:bin_to_list(MetaBin),
-    Sub = lists:nth(2, string:tokens(MetaString, "'")),
-    list_to_tuple(lists:map(fun(X) -> string:strip(X) end, string:tokens(Sub, "-"))).    
     
 %%================================================================================
 %% @private
@@ -269,6 +260,22 @@ strip_color_and_ctcp(String) ->
 		 end, {false, []}, String),
     Res.
 
+rip_meta(MetaBin) ->
+    MS = binary:bin_to_list(MetaBin),
+    string:strip(lists:nth(2, string:tokens(MS, "'"))).
 
-		      
+%%================================================================================
+%% @private
+%% @doc
+%% Format and send on a socket
+%% ================================================================================
+format_and_send(Socket, FS, A) ->
+    gen_tcp:send(Socket, io_lib:format(FS, A)++[13,10]).		      
     
+%%================================================================================
+%% @private
+%% @doc
+%% Message a channel and address a nick
+%%================================================================================
+reply_to_nick(Socket, Channel, Nick, FS, A) ->
+    format_and_send(Socket, "PRIVMSG ~s :~s, " ++ FS, [Channel, Nick] ++ [A]).
