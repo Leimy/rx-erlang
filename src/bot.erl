@@ -262,8 +262,29 @@ strip_color_and_ctcp(String) ->
 
 rip_meta(MetaBin) ->
     MS = binary:bin_to_list(MetaBin),
-    string:strip(lists:nth(2, string:tokens(MS, "'"))).
+    {_, Res} = lists:foldl(
+		 fun(X, {State, Accum}) ->
+			     evalnext(X, {State, Accum})
+		 end, {initial, []}, MS),
+    Res.	
 
+%% 16#27 == '
+evalnext(_, {done, Accum}) ->
+    {done, Accum};
+evalnext(16#27, {initial, Accum}) ->
+    {capturetillquote, Accum};
+evalnext(_, {initial, Accum}) ->
+    {initial, Accum};
+evalnext(16#27, {capturetillquote, Accum}) ->
+    {checksemicolon, Accum++[16#27]};
+evalnext(X, {capturetillquote, Accum}) ->
+    {capturetillquote, Accum++[X]};
+%% 16#3b == ;
+evalnext(16#3b, {checksemicolon, Accum}) ->
+    {done, lists:droplast(Accum)};
+evalnext(X, {checksemicolon, Accum}) ->
+    {capturetillquote, Accum++[X]}.
+    
 %%================================================================================
 %% @private
 %% @doc
